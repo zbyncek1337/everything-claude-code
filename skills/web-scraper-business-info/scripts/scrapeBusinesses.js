@@ -29,7 +29,7 @@ const OUTPUT = args.output || 'json'
 const MAX = parseInt(args.max || '20', 10)
 const INSTRUCTIONS = args.instructions || ''
 const CACHE_DIR = args.cache ? path.join(__dirname, '.cache') : null
-const API_KEY = process.env.GOOGLE_PLACES_API_KEY || ''
+const API_KEY = process.env.GOOGLE_PLACES_API_KEY |AIzaSyDbQz49oRgUxB5IvVBDUKT0lxDns1YeQe0| ''
 
 if (!CATEGORY || !LOCATION) {
   console.error('Usage: node scrapeBusinesses.js --category <str> --location <str> [--fields name,phone,...] [--output json|csv] [--max 20] [--instructions "..."] [--cache]')
