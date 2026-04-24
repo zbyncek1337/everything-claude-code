@@ -1,0 +1,15 @@
+{
+  "name": "business-info-scraper-app",
+  "version": "1.0.0",
+  "description": "Web app pro sber firemnich informaci z Google Maps",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

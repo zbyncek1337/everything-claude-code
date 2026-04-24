@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sber firemnich informaci</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+    header{background:linear-gradient(135deg,#1e40af 0%,#7c3aed 100%);padding:2rem;text-align:center}
+    header h1{font-size:1.8rem;font-weight:700}
+    header p{margin-top:.4rem;opacity:.85;font-size:.95rem}
+    .container{max-width:960px;margin:0 auto;padding:2rem 1.5rem}
+    .card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:1.5rem;margin-bottom:1.5rem}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    @media(max-width:600px){.grid-2{grid-template-columns:1fr}}
+    label{display:block;font-size:.82rem;font-weight:600;color:#94a3b8;margin-bottom:.4rem;text-transform:uppercase;letter-spacing:.05em}
+    input,textarea,select{width:100%;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;padding:.65rem .9rem;font-size:.95rem;font-family:inherit;transition:border-color .2s}
+    input:focus,textarea:focus,select:focus{outline:none;border-color:#6366f1}
+    textarea{resize:vertical;min-height:80px}
+    .chips{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem}
+    .chip{background:#1e3a8a;border:1px solid #3b82f6;color:#93c5fd;border-radius:20px;padding:.3rem .8rem;font-size:.8rem;cursor:pointer;transition:background .15s}
+    .chip:hover{background:#1d4ed8}
+    button[type=submit]{width:100%;background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;border:none;border-radius:8px;padding:.85rem;font-size:1rem;font-weight:600;cursor:pointer;transition:opacity .2s,transform .1s;margin-top:.5rem}
+    button[type=submit]:hover{opacity:.9}
+    button[type=submit]:active{transform:scale(.98)}
+    button[type=submit]:disabled{opacity:.5;cursor:not-allowed}
+    .mock-banner{background:#451a03;border:1px solid #92400e;color:#fcd34d;border-radius:8px;padding:.7rem 1rem;font-size:.875rem;margin-bottom:1rem;display:none}
+    .stats{color:#94a3b8;font-size:.875rem;margin-bottom:1rem}
+    .results-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+    .biz-card{background:#1e293b;border:1px solid #334155;border-radius:10px;padding:1.2rem;transition:border-color .2s,transform .15s}
+    .biz-card:hover{border-color:#6366f1;transform:translateY(-2px)}
+    .biz-name{font-weight:700;font-size:1rem;margin-bottom:.6rem;color:#f1f5f9}
+    .rating{display:inline-flex;align-items:center;gap:.3rem;background:#0f172a;border-radius:6px;padding:.2rem .5rem;font-size:.85rem;margin-bottom:.7rem}
+    .star{color:#facc15}
+    .rev{color:#64748b;font-size:.78rem}
+    .biz-info{font-size:.85rem;color:#94a3b8;line-height:1.7}
+    .biz-info span{display:flex;gap:.5rem;align-items:flex-start}
+    .biz-info .icon{flex-shrink:0;width:16px;text-align:center}
+    .biz-actions{display:flex;gap:.5rem;margin-top:.9rem;flex-wrap:wrap}
+    .btn-sm{font-size:.78rem;padding:.3rem .7rem;border-radius:6px;border:1px solid #334155;background:#0f172a;color:#94a3b8;cursor:pointer;text-decoration:none;transition:border-color .15s,color .15s}
+    .btn-sm:hover{border-color:#6366f1;color:#a5b4fc}
+    .export-bar{display:flex;gap:.75rem;margin-bottom:1rem;justify-content:flex-end}
+    .btn-export{font-size:.82rem;padding:.4rem .9rem;border-radius:6px;border:1px solid #334155;background:#1e293b;color:#94a3b8;cursor:pointer;transition:border-color .15s}
+    .btn-export:hover{border-color:#6366f1;color:#a5b4fc}
+    .spinner{display:none;text-align:center;padding:3rem;color:#64748b}
+    .spinner::after{content:'';display:inline-block;width:36px;height:36px;border:3px solid #334155;border-top-color:#6366f1;border-radius:50%;animation:spin .7s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .error-box{background:#450a0a;border:1px solid #991b1b;color:#fca5a5;border-radius:8px;padding:.8rem 1rem;display:none;margin-bottom:1rem}
+    .empty{text-align:center;padding:3rem;color:#64748b}
+  </style>
+</head>
+<body>
+<header>
+  <h1>Sber firemnich informaci</h1>
+  <p>Najdi zakazniky z Google Maps podle kategorie a lokality</p>
+</header>
+<div class="container">
+  <div class="card">
+    <form id="searchForm">
+      <div class="grid-2">
+        <div>
+          <label>Kategorie firmy</label>
+          <input id="category" type="text" placeholder="autoopravna, kosmetika, kadernictvi..." required />
+          <div class="chips">
+            <span class="chip" onclick="setcat('autoopravna')">Autoopravna</span>
+            <span class="chip" onclick="setcat('kosmeticky salon')">Kosmetika</span>
+            <span class="chip" onclick="setcat('kadernictvi')">Kadernictvi</span>
+            <span class="chip" onclick="setcat('restaurace')">Restaurace</span>
+            <span class="chip" onclick="setcat('zubar')">Zubar</span>
+          </div>
+        </div>
+        <div>
+          <label>Lokalita</label>
+          <input id="location" type="text" placeholder="Brno, Praha 2, Ostrava..." required />
+        </div>
+      </div>
+      <div style="margin-top:1rem">
+        <label>Vlastni instrukce <span style="color:#475569;font-weight:400">(volitelne)</span></label>
+        <textarea id="instructions" placeholder="Napr.: Vypis jen firmy s hodnocenim 4.0 a vys, serad podle poctu recenzi, nezobrazuj firmy bez telefonniho cisla..."></textarea>
+      </div>
+      <div style="margin-top:1rem;max-width:160px">
+        <label>Max. vysledku</label>
+        <select id="maxResults">
+          <option value="10">10</option>
+          <option value="20" selected>20</option>
+          <option value="40">40</option>
+          <option value="60">60</option>
+        </select>
+      </div>
+      <button type="submit" id="searchBtn">Vyhledat firmy</button>
+    </form>
+  </div>
+  <div class="error-box" id="errorBox"></div>
+  <div class="spinner" id="spinner"></div>
+  <div id="resultsSection" style="display:none">
+    <div class="mock-banner" id="mockBanner">Demo rezim - zobrazuji se ukazkova data. Nastav GOOGLE_PLACES_API_KEY pro realna data.</div>
+    <div class="export-bar">
+      <button class="btn-export" onclick="exportCSV()">Stahnout CSV</button>
+      <button class="btn-export" onclick="exportJSON()">Stahnout JSON</button>
+    </div>
+    <div class="stats" id="statsBar"></div>
+    <div class="results-grid" id="resultsGrid"></div>
+  </div>
+</div>
+<script>
+  var currentResults=[]
+  function setcat(v){document.getElementById('category').value=v}
+  function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+
+  document.getElementById('searchForm').addEventListener('submit',async function(e){
+    e.preventDefault()
+    var category=document.getElementById('category').value.trim()
+    var location=document.getElementById('location').value.trim()
+    var instructions=document.getElementById('instructions').value.trim()
+    var max=document.getElementById('maxResults').value
+    setLoading(true);hideError();document.getElementById('resultsSection').style.display='none'
+    try{
+      var res=await fetch('/api/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({category,location,max:parseInt(max)})})
+      var data=await res.json()
+      if(!res.ok) throw new Error(data.error||'Neznama chyba')
+      var results=data.results||[]
+      if(instructions) results=applyInstructions(results,instructions)
+      currentResults=results
+      renderResults(results,data.mock,category,location)
+    }catch(err){showError(err.message)}
+    finally{setLoading(false)}
+  })
+
+  function applyInstructions(results,instructions){
+    var lower=instructions.toLowerCase()
+    var rm=lower.match(/(?:rating|hodnocen[^\s]*)\s*[>=]+\s*([\d.]+)/)
+    if(rm) results=results.filter(function(r){return r.rating!==''&&parseFloat(r.rating)>=parseFloat(rm[1])})
+    if((lower.includes('bez telefon')||lower.includes('telefonn'))&&(lower.includes('nezobraz')||lower.includes('vynech')||lower.includes('pouze s')))
+      results=results.filter(function(r){return r.phone})
+    if(lower.includes('recenz')&&(lower.includes('serad')||lower.includes('rad')))
+      results=results.slice().sort(function(a,b){return(b.reviews||0)-(a.reviews||0)})
+    else if((lower.includes('rating')||lower.includes('hodnocen'))&&(lower.includes('serad')||lower.includes('rad')))
+      results=results.slice().sort(function(a,b){return(b.rating||0)-(a.rating||0)})
+    return results
+  }
+
+  function renderResults(results,isMock,category,location){
+    document.getElementById('resultsSection').style.display='block'
+    document.getElementById('mockBanner').style.display=isMock?'block':'none'
+    document.getElementById('statsBar').textContent='Nalezeno '+results.length+' firem - "'+category+'" v "'+location+'"'
+    var grid=document.getElementById('resultsGrid')
+    if(!results.length){grid.innerHTML='<div class="empty">Zadne vysledky nenalezeny.</div>';return}
+    grid.innerHTML=results.map(function(b){
+      return '<div class="biz-card">'+
+        '<div class="biz-name">'+esc(b.name)+'</div>'+
+        (b.rating!==''?'<div class="rating"><span class="star">&#9733;</span><strong>'+esc(b.rating)+'</strong>'+(b.reviews?'<span class="rev">('+esc(b.reviews)+' recenzi)</span>':'')+'</div>':'')+
+        '<div class="biz-info">'+
+          (b.address?'<span><span class="icon">&#128205;</span>'+esc(b.address)+'</span>':'')+
+          (b.phone?'<span><span class="icon">&#128222;</span>'+esc(b.phone)+'</span>':'')+
+          (b.website?'<span><span class="icon">&#127760;</span><a href="'+esc(b.website)+'" target="_blank" style="color:#818cf8">'+esc(b.website.replace(/^https?:\/\//,''))+'</a></span>':'')+
+          (b.hours?'<span><span class="icon">&#128336;</span>'+esc(b.hours.split('|')[0])+'</span>':'')+
+        '</div>'+
+        '<div class="biz-actions">'+
+          (b.maps_url&&b.maps_url!='#'?'<a class="btn-sm" href="'+esc(b.maps_url)+'" target="_blank">Mapy</a>':'')+
+          (b.phone?'<a class="btn-sm" href="tel:'+esc(b.phone)+'">Volat</a>':'')+
+          (b.website?'<a class="btn-sm" href="'+esc(b.website)+'" target="_blank">Web</a>':'')+
+        '</div></div>'
+    }).join('')
+  }
+
+  function setLoading(on){
+    document.getElementById('spinner').style.display=on?'block':'none'
+    document.getElementById('searchBtn').disabled=on
+    document.getElementById('searchBtn').textContent=on?'Hledam...':'Vyhledat firmy'
+  }
+  function showError(msg){var b=document.getElementById('errorBox');b.textContent='Chyba: '+msg;b.style.display='block'}
+  function hideError(){document.getElementById('errorBox').style.display='none'}
+
+  function exportCSV(){
+    if(!currentResults.length) return
+    var h=Object.keys(currentResults[0])
+    var rows=[h.join(',')].concat(currentResults.map(function(r){return h.map(function(k){return '"'+String(r[k]||'').replace(/"/g,'""')+'"'}).join(',')}))
+    dl('firmy.csv',rows.join('\n'),'text/csv')
+  }
+  function exportJSON(){if(!currentResults.length)return;dl('firmy.json',JSON.stringify(currentResults,null,2),'application/json')}
+  function dl(name,content,type){
+    var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type}));a.download=name;a.click()
+  }
+</script>
+</body>
+</html>
